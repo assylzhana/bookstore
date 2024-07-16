@@ -14,8 +14,7 @@ public class BookService {
 
     private static final String TOPIC = "book-events";
 
-    @Autowired
-    private KafkaTemplate<String, Object> kafkaTemplate;
+    private final KafkaTemplate<String, Book> kafkaTemplate;
 
     public void sendBookCreatedEvent(Book book) {
         kafkaTemplate.send(TOPIC, book.getId().toString(), book);
@@ -32,6 +31,7 @@ public class BookService {
     }
     public void createBook(Book book) {
         bookRepository.save(book);
+        sendBookCreatedEvent(book);
     }
 
     public Book findBookById(Long id) {
