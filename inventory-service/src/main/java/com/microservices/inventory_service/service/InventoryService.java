@@ -15,6 +15,7 @@ public class InventoryService {
     @Autowired
     private InventoryRepository inventoryRepository;
 
+
     @KafkaListener(topics = "book-events", groupId = "inventory-service-group")
     public void consumeBookEvent(Book book) {
         System.out.println("Received event for book: " + book);
@@ -22,7 +23,7 @@ public class InventoryService {
         if (existingItems.isEmpty()) {
             InventoryItem newItem = new InventoryItem();
             newItem.setBookId(book.getId());
-            newItem.setStatus("available");
+            newItem.setStatus("not available");
             newItem.setQuantity(0);
             newItem.setPrice(0.0);
             inventoryRepository.save(newItem);

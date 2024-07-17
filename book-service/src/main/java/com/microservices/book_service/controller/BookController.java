@@ -38,6 +38,7 @@ public class BookController {
         Book book = bookService.findBookById(id);
         if(book != null){
             book.setTitle(newbook.getTitle());
+            book.setDescription(newbook.getDescription());
             book.setAuthor(newbook.getAuthor());
             book.setPageNumber(newbook.getPageNumber());
             bookService.editBook(book);

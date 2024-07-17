@@ -42,10 +42,18 @@ public class InventoryController {
     public ResponseEntity<InventoryItem> editInventoryItem(@PathVariable Long id, @RequestBody InventoryItem inventoryItemDetails) {
         InventoryItem inventoryItem = inventoryService.getInventoryItem(id);
         if (inventoryItem != null) {
-            inventoryItem.setStatus(inventoryItemDetails.getStatus());
-            inventoryItem.setQuantity(inventoryItemDetails.getQuantity());
-            inventoryItem.setPrice(inventoryItemDetails.getPrice());
-            inventoryItem.setBookId(inventoryItemDetails.getBookId());
+            if(inventoryItemDetails.getQuantity() == 0){
+                inventoryItem.setStatus("not available");
+            }
+            else{
+                inventoryItem.setStatus("available");
+            }
+            if (inventoryItemDetails.getQuantity() !=null){
+                inventoryItem.setQuantity(inventoryItemDetails.getQuantity());
+            }
+            if (inventoryItemDetails.getPrice() !=null){
+                inventoryItem.setPrice(inventoryItemDetails.getPrice());
+            }
             inventoryService.editInventoryItem(inventoryItem);
             return new ResponseEntity<>(inventoryItem, HttpStatus.OK);
         } else {

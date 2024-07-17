@@ -20,6 +20,7 @@
     <modules>
         <module>book-service</module>
         <module>inventory-service</module>
+        <module>order-service</module>
     </modules>
 
     <properties>

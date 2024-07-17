@@ -1,4 +1,4 @@
-package com.microservices.inventory_service.dto;
+package com.microservices.order_service.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -9,10 +9,11 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class Book {
+public class InventoryItem {
+
     private Long id;
-    private String title;
-    private String description;
-    private String author;
-    private Integer pageNumber;
+    private String status;
+    private Integer quantity;
+    private Double price;
+    private Long bookId;
 }
