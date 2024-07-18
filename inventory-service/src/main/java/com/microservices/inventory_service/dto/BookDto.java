@@ -9,10 +9,12 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class Book {
+public class BookDto {
     private Long id;
     private String title;
     private String description;
     private String author;
+    private String genre;
     private Integer pageNumber;
+    private String action;
 }

@@ -24,9 +24,4 @@ public class Order {
     private List<Long> bookIds;
     private String paymentStatus;
 
-    @ElementCollection
-    @MapKeyColumn(name = "book_id")
-    @Column(name = "price")
-    @CollectionTable(name = "order_book_prices", joinColumns = @JoinColumn(name = "order_id"))
-    private Map<Long, Double> bookPrices = new HashMap<>();
 }

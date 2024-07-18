@@ -1,5 +1,6 @@
 package com.microservices.book_service.service;
 
+import com.microservices.book_service.dto.BookDto;
 import com.microservices.book_service.model.Book;
 import com.microservices.book_service.repository.BookRepository;
 import lombok.RequiredArgsConstructor;
@@ -13,25 +14,42 @@ import java.util.List;
 public class BookService {
 
     private static final String TOPIC = "book-events";
+    private static final String SEARCH_TOPIC = "search-events";
 
-    private final KafkaTemplate<String, Book> kafkaTemplate;
+    private final KafkaTemplate<String, BookDto> kafkaTemplate;
+    private final BookRepository bookRepository;
 
-    public void sendBookCreatedEvent(Book book) {
+    public void sendBookEvent(BookDto book) {
         kafkaTemplate.send(TOPIC, book.getId().toString(), book);
+        kafkaTemplate.send(SEARCH_TOPIC, book.getId().toString(), book);
     }
 
-    private final BookRepository bookRepository;
+    public void deleteBook(Long id) {
+        Book book = bookRepository.findById(id).orElse(null);
+        if (book != null) {
+            BookDto bookEvent = new BookDto(
+                    book.getId(), book.getTitle(), book.getDescription(), book.getAuthor(), book.getGenre(), book.getPageNumber(), "create"
+            );
+            bookRepository.deleteById(id);
+            sendBookEvent(bookEvent);
+        }
+    }
+
+    public void createBook(Book book) {
+        bookRepository.save(book);
+        BookDto bookEvent = new BookDto(
+                book.getId(), book.getTitle(), book.getDescription(), book.getAuthor(), book.getGenre(), book.getPageNumber(), "create"
+        );
+        sendBookEvent(bookEvent);
+    }
+
 
     public List<Book> getAllBooks() {
         return bookRepository.findAll();
     }
 
     public Book getBook(Long id) {
-        return  bookRepository.findById(id).orElse(null);
-    }
-    public void createBook(Book book) {
-        bookRepository.save(book);
-        sendBookCreatedEvent(book);
+        return bookRepository.findById(id).orElse(null);
     }
 
     public Book findBookById(Long id) {
@@ -40,9 +58,5 @@ public class BookService {
 
     public void editBook(Book book) {
         bookRepository.save(book);
-    }
-
-    public void deleteBook(Long id) {
-        bookRepository.deleteById(id);
     }
 }

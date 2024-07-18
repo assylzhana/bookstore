@@ -1,4 +1,4 @@
-package com.microservices.book_service.model;
+package com.microservices.order_service.model;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -6,21 +6,18 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.io.Serializable;
+import java.util.List;
 
 @Entity
-@Table(name = "books")
+@Table(name = "order_item_price")
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class Book implements Serializable {
+public class OrderItemPrice {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String title;
-    private String description;
-    private String author;
-    private String genre;
-    private Integer pageNumber;
+    private Long bookId;
+    private Double price;
 }

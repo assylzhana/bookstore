@@ -12,9 +12,4 @@ import java.util.List;
 public interface OrderRepository  extends JpaRepository<Order, Long> {
     List<Order> findAllByUserId(Long userId);
 
-
-    @Query("SELECT o FROM Order o WHERE :bookId MEMBER OF o.bookIds")
-    List<Order> findByBookId(@Param("bookId") Long bookId);
-
-
 }

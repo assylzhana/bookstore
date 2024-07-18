@@ -40,6 +40,7 @@ public class BookController {
             book.setTitle(newbook.getTitle());
             book.setDescription(newbook.getDescription());
             book.setAuthor(newbook.getAuthor());
+            book.setGenre(newbook.getGenre());
             book.setPageNumber(newbook.getPageNumber());
             bookService.editBook(book);
             return ResponseEntity.ok(book);
