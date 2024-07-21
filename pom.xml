@@ -23,6 +23,7 @@
         <module>order-service</module>
         <module>payment-service</module>
         <module>search-service</module>
+        <module>user-service</module>
     </modules>
 
     <properties>

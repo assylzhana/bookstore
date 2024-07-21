@@ -21,6 +21,9 @@ public class BookService {
 
     public void sendBookEvent(BookDto book) {
         kafkaTemplate.send(TOPIC, book.getId().toString(), book);
+    }
+
+    public void sendBookEventToSearch(BookDto book) {
         kafkaTemplate.send(SEARCH_TOPIC, book.getId().toString(), book);
     }
 
@@ -28,10 +31,11 @@ public class BookService {
         Book book = bookRepository.findById(id).orElse(null);
         if (book != null) {
             BookDto bookEvent = new BookDto(
-                    book.getId(), book.getTitle(), book.getDescription(), book.getAuthor(), book.getGenre(), book.getPageNumber(), "create"
+                    book.getId(), book.getTitle(), book.getDescription(), book.getAuthor(), book.getGenre(), book.getPageNumber(), "delete"
             );
             bookRepository.deleteById(id);
             sendBookEvent(bookEvent);
+            sendBookEventToSearch(bookEvent);
         }
     }
 
@@ -41,6 +45,7 @@ public class BookService {
                 book.getId(), book.getTitle(), book.getDescription(), book.getAuthor(), book.getGenre(), book.getPageNumber(), "create"
         );
         sendBookEvent(bookEvent);
+        sendBookEventToSearch(bookEvent);
     }
 
 
@@ -58,5 +63,9 @@ public class BookService {
 
     public void editBook(Book book) {
         bookRepository.save(book);
+        BookDto bookEvent = new BookDto(
+                book.getId(), book.getTitle(), book.getDescription(), book.getAuthor(), book.getGenre(), book.getPageNumber(), "edit"
+        );
+        sendBookEventToSearch(bookEvent);
     }
 }

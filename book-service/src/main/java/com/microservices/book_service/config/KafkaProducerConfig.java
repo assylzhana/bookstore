@@ -1,6 +1,7 @@
 package com.microservices.book_service.config;
 
 
+import com.microservices.book_service.dto.BookDto;
 import com.microservices.book_service.model.Book;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
@@ -33,5 +34,19 @@ public class KafkaProducerConfig {
     @Bean
     public KafkaTemplate<String, Book> kafkaTemplate() {
         return new KafkaTemplate<>(producerFactory());
+    }
+
+    @Bean
+    public ProducerFactory<String, BookDto> bookDtoProducerFactory() {
+        Map<String, Object> configProps = new HashMap<>();
+        configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers);
+        configProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+        configProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
+        return new DefaultKafkaProducerFactory<>(configProps);
+    }
+
+    @Bean
+    public KafkaTemplate<String, BookDto> bookDtoKafkaTemplate() {
+        return new KafkaTemplate<>(bookDtoProducerFactory());
     }
 }

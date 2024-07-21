@@ -33,8 +33,20 @@ public class BookSearchService {
                     bookDto.getPageNumber()
             );
             bookRepository.save(book);
-        } else if ("delete".equals(bookDto.getAction())) {
+        }
+        else if ("delete".equals(bookDto.getAction())) {
             bookRepository.deleteById(bookDto.getId());
+        }
+        else if ("edit".equals(bookDto.getAction())) {
+            if (bookRepository.findById(bookDto.getId()).isPresent()){
+                Book book = bookRepository.findById(bookDto.getId()).orElse(null);
+                book.setDescription(book.getDescription());
+                book.setGenre(book.getGenre());
+                book.setTitle(book.getTitle());
+                book.setAuthor(book.getAuthor());
+                book.setPageNumber(book.getPageNumber());
+                bookRepository.save(book);
+            }
         }
     }
 
