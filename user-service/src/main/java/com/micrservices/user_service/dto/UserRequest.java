@@ -9,9 +9,6 @@ import javax.validation.constraints.NotEmpty;
 @Getter
 @Setter
 public class UserRequest {
-    @Email
-    @NotEmpty
-    private String email;
     @NotEmpty
     private String oldPassword;
     @NotEmpty

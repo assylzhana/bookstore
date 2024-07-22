@@ -43,7 +43,7 @@ public class UserController {
     @PutMapping("/change-password")
     public ResponseEntity<String> changePassword(@RequestBody UserRequest userRequest) {
         try {
-            userService.changePassword(userRequest.getEmail(), userRequest.getOldPassword(), userRequest.getNewPassword());
+            userService.changePassword(userRequest.getOldPassword(), userRequest.getNewPassword());
             return ResponseEntity.ok("Password changed successfully.");
         } catch (UsernameNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found.");

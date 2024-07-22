@@ -45,8 +45,8 @@ public class UserImplementation {
         userRepository.delete(user);
     }
 
-    public void changePassword(String email, String oldPassword, String newPassword) {
-        User user = userRepository.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException("User not found"));
+    public void changePassword( String oldPassword, String newPassword) {
+        User user = userRepository.findByEmail(getCurrentUser().getEmail()).orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
         if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
             throw new IllegalArgumentException("Old password is incorrect");
