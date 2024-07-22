@@ -1,5 +1,6 @@
 package com.micrservices.user_service.service;
 
+import com.micrservices.user_service.model.Token;
 import com.micrservices.user_service.model.User;
 import com.micrservices.user_service.repository.TokenRepository;
 import io.jsonwebtoken.Claims;
@@ -96,4 +97,10 @@ public class JwtService {
         byte[] keyBytes = Decoders.BASE64.decode(secretKey);
         return Keys.hmacShaKeyFor(keyBytes);
     }
+
+    public boolean isTokenInvalidated(String token) {
+        Token storedToken = tokenRepository.findByAccessToken(token).orElse(null);
+        return storedToken == null || storedToken.isLoggedOut();
+    }
+
 }
