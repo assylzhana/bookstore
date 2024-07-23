@@ -25,7 +25,6 @@ public class UserImplementation {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-
     public User getCurrentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();

@@ -1,5 +1,6 @@
 package com.microservices.order_service.service;
 
+import com.microservices.order_service.dto.CustomUserDetails;
 import com.microservices.order_service.dto.InventoryItem;
 import com.microservices.order_service.model.Order;
 import com.microservices.order_service.model.OrderItemPrice;
@@ -7,6 +8,8 @@ import com.microservices.order_service.repository.OrderItemPriceRepository;
 import com.microservices.order_service.repository.OrderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -41,6 +44,8 @@ public class OrderService {
 
     @Transactional
     public Order createOrder(Order order) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Long userId = ((CustomUserDetails) authentication.getPrincipal()).getId();
         order.setStatus("PENDING");
         order.setPaymentStatus("not paid");
         order.setTotalAmount(calculateTotalAmount(order.getBookIds()));
@@ -56,7 +61,6 @@ public class OrderService {
         }
         return sum;
     }
-
 
 
     @Transactional

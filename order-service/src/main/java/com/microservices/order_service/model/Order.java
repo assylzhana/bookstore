@@ -23,5 +23,4 @@ public class Order {
     @ElementCollection
     private List<Long> bookIds;
     private String paymentStatus;
-
 }
