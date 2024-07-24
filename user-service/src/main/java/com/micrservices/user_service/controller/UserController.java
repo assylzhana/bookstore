@@ -1,6 +1,9 @@
 package com.micrservices.user_service.controller;
 
+import com.micrservices.user_service.dto.UserDto;
 import com.micrservices.user_service.dto.UserRequest;
+import com.micrservices.user_service.model.User;
+import com.micrservices.user_service.repository.UserRepository;
 import com.micrservices.user_service.service.UserImplementation;
 import com.micrservices.user_service.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +20,9 @@ import javax.validation.constraints.NotEmpty;
 public class UserController {
     @Autowired
     private UserImplementation userService;
+
+    @Autowired
+    private UserRepository userRepository;
     @GetMapping
     public ResponseEntity<String> demo(){
         return ResponseEntity.ok("hi");
@@ -48,5 +54,11 @@ public class UserController {
         } catch (UsernameNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found.");
         }
+    }
+    @GetMapping("/email/{email}")
+    public ResponseEntity<UserDto> getUserByEmail(@PathVariable String email) {
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        UserDto userDto = new UserDto(user.getId(), user.getEmail(), user.getFullName(), user.getRole().name());
+        return ResponseEntity.ok(userDto);
     }
 }
