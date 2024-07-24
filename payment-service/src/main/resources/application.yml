@@ -1,0 +1,26 @@
+spring:
+  application:
+    name: payment-service
+  datasource:
+    url: jdbc:postgresql://localhost:5432/bookstore
+    username: postgres
+    password: asylka225
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    generate-ddl: true
+  kafka:
+    bootstrap-servers: localhost:9092
+
+server:
+  port: 8084
+
+paypal:
+  client-id: ARh5sHeMThxiW4keQLQLLshpbUGNFu1rC7PDHA04q1E1K4Ogae-uMDeadwGw3X_7CXMm3nvTc1AxEHf5
+  client-secret: EJt52osn3dbbZCpurpA1SYrQXJn3SgA62JoiTQRYrMVA35tHq9SFGGK4nWOSNmYU9yQnm12oOMXfOY-C
+  mode: sandbox
+
+
+
