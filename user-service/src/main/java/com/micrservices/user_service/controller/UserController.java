@@ -23,9 +23,18 @@ public class UserController {
 
     @Autowired
     private UserRepository userRepository;
-    @GetMapping
-    public ResponseEntity<String> demo(){
-        return ResponseEntity.ok("hi");
+    @GetMapping("/{email}")
+    public ResponseEntity<UserDto> getUserByUsername(@PathVariable String email) {
+        User user = userRepository.findByEmail(email).orElseThrow();
+        if (user == null) {
+            return ResponseEntity.notFound().build();
+        }
+        UserDto userDto = new UserDto();
+        userDto.setId(user.getId());
+        userDto.setEmail(user.getEmail());
+        userDto.setPassword(user.getPassword());
+        userDto.setRole(user.getRole().name());
+        return ResponseEntity.ok(userDto);
     }
 
     @DeleteMapping("/delete")

@@ -59,9 +59,6 @@ public class OrderService {
 
     @Transactional
     public Order createOrder(Order order) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        Long userId = ((UserDto) authentication.getPrincipal()).getId();
-        order.setUserId(userId);
         order.setStatus("PENDING");
         order.setPaymentStatus("not paid");
         order.setTotalAmount(calculateTotalAmount(order.getBookIds()));
