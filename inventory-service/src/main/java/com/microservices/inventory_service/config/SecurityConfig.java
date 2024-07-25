@@ -1,8 +1,9 @@
-package com.microservices.order_service.config;
+package com.microservices.inventory_service.config;
 
-import com.microservices.order_service.jwt.JwtFilter;
+import com.microservices.inventory_service.jwt.JwtFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -10,6 +11,7 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+
 
 @Configuration
 @EnableWebSecurity
@@ -27,7 +29,9 @@ public class SecurityConfig {
                 .csrf().disable()
                 .authorizeRequests(authorizeRequests ->
                         authorizeRequests
-                                .requestMatchers("/order/**").hasAuthority("USER")
+                                .requestMatchers(HttpMethod.PUT, "/inventory/{id}").hasAuthority("ADMIN")
+                                .requestMatchers(HttpMethod.POST, "/inventory/**").hasAuthority("ADMIN")
+                                .requestMatchers(HttpMethod.DELETE, "/inventory/**").hasAuthority("ADMIN")
                                 .anyRequest().authenticated()
                 )
                 .sessionManagement(sessionManagement ->
@@ -43,4 +47,6 @@ public class SecurityConfig {
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
+
+
 }

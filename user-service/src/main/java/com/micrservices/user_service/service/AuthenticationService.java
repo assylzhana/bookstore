@@ -1,6 +1,7 @@
 package com.micrservices.user_service.service;
 
 import com.micrservices.user_service.model.AuthenticationResponse;
+import com.micrservices.user_service.model.Role;
 import com.micrservices.user_service.model.Token;
 import com.micrservices.user_service.model.User;
 import com.micrservices.user_service.repository.TokenRepository;
@@ -33,7 +34,7 @@ public class AuthenticationService {
         user.setFullName(request.getFullName());
         user.setEmail(request.getEmail());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.setRole(request.getRole());
+        user.setRole(Role.valueOf("USER"));
         user = repository.save(user);
 
         String accessToken = jwtService.generateAccessToken(user);
