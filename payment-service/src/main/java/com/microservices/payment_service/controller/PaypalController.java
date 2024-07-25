@@ -1,12 +1,16 @@
 package com.microservices.payment_service.controller;
 
+import com.microservices.payment_service.model.PayLogic;
+import com.microservices.payment_service.repository.PaymentRepository;
 import com.microservices.payment_service.service.PaypalService;
 import com.paypal.api.payments.Links;
 import com.paypal.api.payments.Payment;
 import com.paypal.base.rest.PayPalRESTException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,14 +23,19 @@ import org.springframework.web.servlet.view.RedirectView;
 public class PaypalController {
 
     private final PaypalService paypalService;
+    @Autowired
+    private PaymentRepository paymentRepository;
 
     @GetMapping("/")
-    public String home() {
+    public String home(Model model) {
+        PayLogic payLogic = paymentRepository.findMaxIdPayLogic();
+        model.addAttribute("pay", payLogic);
         return "index";
     }
 
     @PostMapping("/payment/create")
     public RedirectView createPayment(
+            @RequestParam("orderId") String orderId,
             @RequestParam("method") String method,
             @RequestParam("amount") String amount,
             @RequestParam("currency") String currency,
@@ -36,6 +45,7 @@ public class PaypalController {
             String cancelUrl = "http://localhost:8084/payment/cancel";
             String successUrl = "http://localhost:8084/payment/success";
             Payment payment = paypalService.createPayment(
+                    orderId,
                     Double.valueOf(amount),
                     currency,
                     method,

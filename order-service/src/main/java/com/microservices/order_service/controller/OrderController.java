@@ -21,6 +21,13 @@ public class OrderController {
     @Autowired
     private OrderService orderService;
 
+
+    @PostMapping("pay")
+    public ResponseEntity<String> pay() {
+        Order orderForPay = orderService.pay();
+        return ResponseEntity.ok("Send for pay : "+orderForPay.getId());
+    }
+
     @PostMapping
     public ResponseEntity<Order> createOrder(@RequestBody OrderRequest orderRequest) {
         Order order = new Order();

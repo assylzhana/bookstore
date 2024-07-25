@@ -30,6 +30,8 @@ public class OrderService {
 
     private static final String TOPIC1 = "order-delete-events";
 
+    private static final String TOPIC2 = "order-pay-events";
+
     private final KafkaTemplate<String, Order> kafkaTemplate;
 
     public void sendOrderCreatedEvent(Order order) {
@@ -38,6 +40,9 @@ public class OrderService {
 
     public void sendOrderCanceledEvent(Order order) {
         kafkaTemplate.send(TOPIC1, order.getId().toString(), order);
+    }
+    public void sendOrderPayEvent(Order order) {
+        kafkaTemplate.send(TOPIC2, order.getId().toString(), order);
     }
 
     @KafkaListener(topics = "inventory-events", groupId = "inventory_order_id")
@@ -119,5 +124,21 @@ public class OrderService {
 
     public void deleteOrder(Long orderId) {
         orderRepository.deleteById(orderId);
+    }
+
+    public Order pay() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Object principal = authentication.getPrincipal();
+        Long userId = null;
+        if (principal instanceof UserDto) {
+            UserDto userDto = (UserDto) principal;
+            userId = userDto.getId();
+        }
+        Order forPay = orderRepository.findByUserId(userId);
+        forPay.setStatus("SUCCESS");
+        forPay.setPaymentStatus("paid");
+        orderRepository.save(forPay);
+        sendOrderPayEvent(forPay);
+        return forPay;
     }
 }
