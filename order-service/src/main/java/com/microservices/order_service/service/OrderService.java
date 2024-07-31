@@ -4,16 +4,18 @@ import com.microservices.order_service.dto.InventoryItem;
 import com.microservices.order_service.dto.UserDto;
 import com.microservices.order_service.model.Order;
 import com.microservices.order_service.model.OrderItemPrice;
+import com.microservices.order_service.model.OrderStatus;
+import com.microservices.order_service.model.PaymentStatus;
 import com.microservices.order_service.repository.OrderItemPriceRepository;
 import com.microservices.order_service.repository.OrderRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
 import java.util.Optional;
 
@@ -21,10 +23,9 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class OrderService {
 
-    @Autowired
-    private OrderRepository orderRepository;
-    @Autowired
-    private OrderItemPriceRepository orderItemPriceRepository;
+    private final OrderRepository orderRepository;
+
+    private final OrderItemPriceRepository orderItemPriceRepository;
 
     private static final String TOPIC = "order-events";
 
@@ -41,6 +42,7 @@ public class OrderService {
     public void sendOrderCanceledEvent(Order order) {
         kafkaTemplate.send(TOPIC1, order.getId().toString(), order);
     }
+
     public void sendOrderPayEvent(Order order) {
         kafkaTemplate.send(TOPIC2, order.getId().toString(), order);
     }
@@ -64,8 +66,8 @@ public class OrderService {
 
     @Transactional
     public Order createOrder(Order order) {
-        order.setStatus("PENDING");
-        order.setPaymentStatus("not paid");
+        order.setStatus(OrderStatus.PENDING);
+        order.setPaymentStatus(PaymentStatus.not_paid);
         order.setTotalAmount(calculateTotalAmount(order.getBookIds()));
         Order savedOrder = orderRepository.save(order);
         sendOrderCreatedEvent(savedOrder);
@@ -90,20 +92,20 @@ public class OrderService {
             existingOrder.setBookIds(updatedOrder.getBookIds());
             existingOrder.setTotalAmount(calculateTotalAmount(updatedOrder.getBookIds()));
             existingOrder.setStatus(updatedOrder.getStatus());
-            existingOrder.setPaymentStatus("not paid");
-            Order savedOrder = orderRepository.save(existingOrder);
-            return savedOrder;
+            existingOrder.setPaymentStatus(PaymentStatus.not_paid);
+            return orderRepository.save(existingOrder);
         } else {
             return null;
         }
     }
+
     @Transactional
     public boolean cancelOrder(Long orderId) {
         Optional<Order> optionalOrder = orderRepository.findById(orderId);
         if (optionalOrder.isPresent()) {
             Order order = optionalOrder.get();
-            order.setStatus("CANCELLED");
-            if(!order.getPaymentStatus().equals("paid")){
+            order.setStatus(OrderStatus.CANCELLED);
+            if (!order.getPaymentStatus().equals(PaymentStatus.paid)) {
                 sendOrderCanceledEvent(order);
             }
             orderRepository.save(order);
@@ -130,13 +132,12 @@ public class OrderService {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         Object principal = authentication.getPrincipal();
         Long userId = null;
-        if (principal instanceof UserDto) {
-            UserDto userDto = (UserDto) principal;
+        if (principal instanceof UserDto userDto) {
             userId = userDto.getId();
         }
         Order forPay = orderRepository.findByUserId(userId);
-        forPay.setStatus("SUCCESS");
-        forPay.setPaymentStatus("paid");
+        forPay.setStatus(OrderStatus.SUCCESS);
+        forPay.setPaymentStatus(PaymentStatus.paid);
         orderRepository.save(forPay);
         sendOrderPayEvent(forPay);
         return forPay;

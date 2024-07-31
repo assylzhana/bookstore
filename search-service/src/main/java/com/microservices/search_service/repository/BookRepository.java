@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-
+@Repository
 public interface BookRepository extends ElasticsearchRepository<Book, Long> {
     List<Book> findByTitleContainingOrDescriptionContainingOrAuthorContainingOrGenreContaining(String title, String description, String author, String genre);
     List<Book> findByTitleContainingOrDescriptionContainingOrAuthorContainingOrGenreContaining(String title, String description, String author, String genre, Sort sort);

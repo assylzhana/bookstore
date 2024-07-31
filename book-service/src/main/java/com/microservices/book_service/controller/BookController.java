@@ -2,6 +2,7 @@ package com.microservices.book_service.controller;
 
 import com.microservices.book_service.model.Book;
 import com.microservices.book_service.service.BookService;
+import jakarta.ws.rs.NotFoundException;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -23,34 +24,54 @@ public class BookController {
         List<Book> books = bookService.getAllBooks();
         return ResponseEntity.ok(books);
     }
+
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-    public void createBook(@RequestBody Book book){
-        bookService.createBook(book);
-    }
-    @GetMapping("/{id}")
-    public ResponseEntity<Book> getBook(@PathVariable Long id) {
-        Book book = bookService.getBook(id);
-        return ResponseEntity.ok(book);
-    }
-    @PutMapping("/{id}")
-    public ResponseEntity<Book> editBook(@PathVariable Long id , @RequestBody Book newbook){
-        Book book = bookService.findBookById(id);
-        if(book != null){
-            book.setTitle(newbook.getTitle());
-            book.setDescription(newbook.getDescription());
-            book.setAuthor(newbook.getAuthor());
-            book.setGenre(newbook.getGenre());
-            book.setPageNumber(newbook.getPageNumber());
-            bookService.editBook(book);
-            return ResponseEntity.ok(book);
+    public ResponseEntity<?> createBook(@RequestBody Book book) {
+        try {
+            Book createdBook = bookService.createBook(book);
+            return new ResponseEntity<>(createdBook, HttpStatus.CREATED);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        return ResponseEntity.notFound().build();
     }
+
+
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getBook(@PathVariable Long id) {
+        try {
+            Book book = bookService.getBook(id);
+            return ResponseEntity.ok(book);
+        } catch (NotFoundException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        } catch (Exception e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> editBook(@PathVariable Long id, @RequestBody Book newbook) {
+        try {
+            Book book = bookService.findBookById(id);
+            if (book != null) {
+                book.setTitle(newbook.getTitle());
+                book.setDescription(newbook.getDescription());
+                book.setAuthor(newbook.getAuthor());
+                book.setGenre(newbook.getGenre());
+                book.setPageNumber(newbook.getPageNumber());
+                bookService.editBook(book);
+                return ResponseEntity.ok(book);
+            }
+            return ResponseEntity.notFound().build();
+        } catch (NotFoundException e) {
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+        }
+
+    }
+
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteBook(@PathVariable Long id){
+    public ResponseEntity<Void> deleteBook(@PathVariable Long id) {
         Book book = bookService.findBookById(id);
-        if(book != null){
+        if (book != null) {
             bookService.deleteBook(id);
             return ResponseEntity.noContent().build();
         }

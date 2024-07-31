@@ -7,7 +7,6 @@ import com.paypal.api.payments.*;
 import com.paypal.base.rest.APIContext;
 import com.paypal.base.rest.PayPalRESTException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 import java.util.ArrayList;
@@ -19,8 +18,8 @@ import java.util.Locale;
 @RequiredArgsConstructor
 public class PaypalService {
     private final APIContext apiContext;
-    @Autowired
-    private PaymentRepository paymentRepository;
+
+    private final PaymentRepository paymentRepository;
 
     public Payment createPayment(String orderId,
                                  Double total,

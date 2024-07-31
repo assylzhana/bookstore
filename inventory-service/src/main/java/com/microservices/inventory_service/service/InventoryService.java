@@ -1,13 +1,12 @@
 package com.microservices.inventory_service.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import com.microservices.inventory_service.dto.Action;
 import com.microservices.inventory_service.dto.BookDto;
 import com.microservices.inventory_service.dto.Order;
 import com.microservices.inventory_service.model.InventoryItem;
+import com.microservices.inventory_service.model.Status;
 import com.microservices.inventory_service.repository.InventoryRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
@@ -18,8 +17,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class InventoryService {
 
-    @Autowired
-    private InventoryRepository inventoryRepository;
+    private final InventoryRepository inventoryRepository;
 
     private static final String TOPIC = "inventory-events";
 
@@ -29,6 +27,7 @@ public class InventoryService {
     public void sendInventoryCreatedEvent(InventoryItem inventoryItem) {
         kafkaTemplate.send(TOPIC, inventoryItem.getId().toString(), inventoryItem);
     }
+
     @KafkaListener(topics = "order-events", groupId = "order_id", containerFactory = "orderKafkaListenerContainerFactory")
     public void consumeOrderEvent(Order order) {
         System.out.println("Created new order item for ID: " + order.getId());
@@ -77,18 +76,18 @@ public class InventoryService {
 
     @KafkaListener(topics = "book-events", groupId = "book_group_id", containerFactory = "bookDtoKafkaListenerContainerFactory")
     public void consumeBookEvent(BookDto book) {
-        if ("create".equals(book.getAction())) {
+        if (book.getAction().equals(Action.create)) {
             List<InventoryItem> existingItems = inventoryRepository.findByBookId(book.getId());
             if (existingItems.isEmpty()) {
                 InventoryItem newItem = new InventoryItem();
                 newItem.setBookId(book.getId());
-                newItem.setStatus("not available");
+                newItem.setStatus(Status.Not_Available);
                 newItem.setQuantity(0);
                 newItem.setPrice(0.0);
                 inventoryRepository.save(newItem);
                 System.out.println("Created new inventory item for book ID: " + book.getId());
             }
-        } else if ("delete".equals(book.getAction())) {
+        } else if (book.getAction().equals(Action.delete)) {
             List<InventoryItem> existingItems = inventoryRepository.findByBookId(book.getId());
             if (!existingItems.isEmpty()) {
                 InventoryItem itemToDelete = existingItems.get(0);

@@ -5,8 +5,7 @@ import com.micrservices.user_service.dto.UserRequest;
 import com.micrservices.user_service.model.User;
 import com.micrservices.user_service.repository.UserRepository;
 import com.micrservices.user_service.service.UserImplementation;
-import com.micrservices.user_service.service.UserService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -17,12 +16,12 @@ import javax.validation.constraints.NotEmpty;
 
 @RestController
 @RequestMapping("/us")
+@RequiredArgsConstructor
 public class UserController {
-    @Autowired
-    private UserImplementation userService;
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserImplementation userService;
+    private final UserRepository userRepository;
+
     @GetMapping("/{email}")
     public ResponseEntity<UserDto> getUserByUsername(@PathVariable String email) {
         User user = userRepository.findByEmail(email).orElseThrow();
@@ -37,7 +36,7 @@ public class UserController {
         return ResponseEntity.ok(userDto);
     }
 
-    @DeleteMapping("/delete")
+    @DeleteMapping("/")
     public ResponseEntity<String> deleteUser(@RequestBody @Email @NotEmpty String email) {
         try {
             userService.deleteUser(email);
@@ -46,7 +45,7 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found.");
         }
     }
-    @DeleteMapping("/delete-account")
+    @DeleteMapping("/account")
     public ResponseEntity<String> deleteAccount() {
         try {
             userService.deleteAccount();

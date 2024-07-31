@@ -16,9 +16,9 @@ import java.util.List;
 public class Order {
     private Long id;
     private Long userId;
-    private String status;
+    private OrderStatus status;
     private Double totalAmount;
     @ElementCollection
     private List<Long> bookIds;
-    private String paymentStatus;
+    private PaymentStatus paymentStatus;
 }

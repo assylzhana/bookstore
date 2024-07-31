@@ -17,7 +17,7 @@ public class InventoryItem {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private String status;
+    private Status status;
     private Integer quantity;
     private Double price;
     @Column(name = "book_id")

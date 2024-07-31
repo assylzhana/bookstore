@@ -16,5 +16,5 @@ public class BookDto {
     private String author;
     private String genre;
     private Integer pageNumber;
-    private String action;
+    private Action action;
 }

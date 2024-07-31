@@ -14,8 +14,8 @@ import java.util.List;
 public class OrderDto {
     private Long id;
     private Long userId;
-    private String status;
+    private OrderStatus status;
     private Double totalAmount;
     private List<Long> bookIds;
-    private String paymentStatus;
+    private PaymentStatus paymentStatus;
 }

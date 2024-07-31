@@ -3,8 +3,10 @@ package com.microservices.order_service.controller;
 import com.microservices.order_service.dto.OrderRequest;
 import com.microservices.order_service.dto.UserDto;
 import com.microservices.order_service.model.Order;
+import com.microservices.order_service.model.OrderStatus;
+import com.microservices.order_service.model.PaymentStatus;
 import com.microservices.order_service.service.OrderService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -16,11 +18,10 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/order")
+@RequiredArgsConstructor
 public class OrderController {
 
-    @Autowired
-    private OrderService orderService;
-
+    private final OrderService orderService;
 
     @PostMapping("pay")
     public ResponseEntity<String> pay() {
@@ -34,8 +35,7 @@ public class OrderController {
         order.setBookIds(orderRequest.getBookIds());
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         Object principal = authentication.getPrincipal();
-        if (principal instanceof UserDto) {
-            UserDto userDto = (UserDto) principal;
+        if (principal instanceof UserDto userDto) {
             order.setUserId(userDto.getId());
             Order savedOrder = orderService.createOrder(order);
             return ResponseEntity.ok(savedOrder);
@@ -46,15 +46,14 @@ public class OrderController {
     @PutMapping("/{orderId}")
     public ResponseEntity<Order> updateOrder(@PathVariable Long orderId, @RequestBody Order updatedOrder) {
         Order id = orderService.getOrderById(orderId).orElseThrow();
-        if (id.getStatus().equals("CANCELLED") || id.getPaymentStatus().equals("paid")){
+        if (id.getStatus().equals(OrderStatus.CANCELLED) || id.getPaymentStatus().equals(PaymentStatus.paid)){
             return ResponseEntity.ok(id);
         }
         else{
-            if (id.getPaymentStatus().equals("not paid")){
-               updatedOrder.setPaymentStatus("not paid");
-            }
-            if (id.getStatus().equals("PENDING")){
-                updatedOrder.setStatus("PENDING");
+            if (id.getPaymentStatus().equals(PaymentStatus.not_paid)){
+               updatedOrder.setPaymentStatus(PaymentStatus.not_paid);
+            }if (id.getStatus().equals(OrderStatus.PENDING)){
+                updatedOrder.setStatus(OrderStatus.PENDING);
             }
         }
         Order order = orderService.updateOrder(orderId, updatedOrder);
