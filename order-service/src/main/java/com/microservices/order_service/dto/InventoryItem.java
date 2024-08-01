@@ -1,5 +1,7 @@
 package com.microservices.order_service.dto;
 
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -12,7 +14,8 @@ import lombok.Setter;
 public class InventoryItem {
 
     private Long id;
-    private String status;
+    @Enumerated(value = EnumType.STRING)
+    private Status status;
     private Integer quantity;
     private Double price;
     private Long bookId;

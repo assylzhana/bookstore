@@ -2,6 +2,7 @@ package com.microservices.order_service.service;
 
 import com.microservices.order_service.dto.InventoryItem;
 import com.microservices.order_service.dto.UserDto;
+import com.microservices.order_service.exception.OrderAlreadyPendingException;
 import com.microservices.order_service.model.Order;
 import com.microservices.order_service.model.OrderItemPrice;
 import com.microservices.order_service.model.OrderStatus;
@@ -128,6 +129,7 @@ public class OrderService {
         orderRepository.deleteById(orderId);
     }
 
+    @Transactional
     public Order pay() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         Object principal = authentication.getPrincipal();
@@ -135,11 +137,15 @@ public class OrderService {
         if (principal instanceof UserDto userDto) {
             userId = userDto.getId();
         }
-        Order forPay = orderRepository.findByUserId(userId);
-        forPay.setStatus(OrderStatus.SUCCESS);
-        forPay.setPaymentStatus(PaymentStatus.paid);
-        orderRepository.save(forPay);
-        sendOrderPayEvent(forPay);
-        return forPay;
+        List<Order> pendingOrders = orderRepository.findAllByUserIdAndStatus(userId, OrderStatus.PENDING);
+        if (pendingOrders.size() != 1) {
+            throw new OrderAlreadyPendingException("U have pending order");
+        }
+        Order pendingOrder = pendingOrders.get(0);
+        pendingOrder.setStatus(OrderStatus.SUCCESS);
+        pendingOrder.setPaymentStatus(PaymentStatus.paid);
+        orderRepository.save(pendingOrder);
+        sendOrderPayEvent(pendingOrder);
+        return pendingOrder;
     }
 }

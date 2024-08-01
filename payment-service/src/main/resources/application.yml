@@ -13,10 +13,8 @@ spring:
     generate-ddl: true
   kafka:
     bootstrap-servers: localhost:9092
-
 server:
   port: 8084
-
 paypal:
   client-id: ARh5sHeMThxiW4keQLQLLshpbUGNFu1rC7PDHA04q1E1K4Ogae-uMDeadwGw3X_7CXMm3nvTc1AxEHf5
   client-secret: EJt52osn3dbbZCpurpA1SYrQXJn3SgA62JoiTQRYrMVA35tHq9SFGGK4nWOSNmYU9yQnm12oOMXfOY-C

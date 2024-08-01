@@ -5,17 +5,19 @@ services:
     image: postgres:latest
     container_name: postgres
     environment:
-      POSTGRES_DB: bookstore
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: bookstore
     ports:
       - "5432:5432"
     networks:
       - app-network
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
 
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:7.17.4
-    container_name: elasticsearch
+    container_name: elastic
     environment:
       - node.name=elasticsearch
       - cluster.name=elasticsearch-cluster
@@ -31,6 +33,13 @@ services:
         hard: -1
     networks:
       - app-network
+    volumes:
+      - elasticsearch-data:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:9200/_cluster/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
 
   zookeeper:
     image: wurstmeister/zookeeper:latest
@@ -57,11 +66,29 @@ services:
     networks:
       - app-network
 
+  discovery:
+    image: discovery:latest
+    container_name: discovery
+    ports:
+      - "8761:8761"
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8761/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
   api-gateway:
     image: api-gateway:latest
     container_name: api-gateway
+    environment:
+      EUREKA_SERVER: http://discovery:8761/eureka/
     ports:
       - "8080:8080"
+    depends_on:
+      discovery:
+        condition: service_healthy
     networks:
       - app-network
 
@@ -71,8 +98,22 @@ services:
     ports:
       - "8086:8086"
     depends_on:
-      - postgres
-      - kafka
+      discovery:
+        condition: service_healthy
+      postgres:
+        condition: service_started
+      kafka:
+        condition: service_started
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/bookstore
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_FLYWAY_URL: jdbc:postgresql://postgres:5432/bookstore
+      SPRING_FLYWAY_USER: postgres
+      SPRING_FLYWAY_PASSWORD: postgres
+      SPRING_FLYWAY_LOCATIONS: classpath:db/migration
+      EUREKA_SERVER: http://discovery:8761/eureka/
     networks:
       - app-network
 
@@ -82,8 +123,18 @@ services:
     ports:
       - "8081:8081"
     depends_on:
-      - postgres
-      - kafka
+      discovery:
+        condition: service_healthy
+      postgres:
+        condition: service_started
+      kafka:
+        condition: service_started
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/bookstore
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      EUREKA_SERVER: http://discovery:8761/eureka/
     networks:
       - app-network
 
@@ -93,8 +144,18 @@ services:
     ports:
       - "8083:8083"
     depends_on:
-      - postgres
-      - kafka
+      discovery:
+        condition: service_healthy
+      postgres:
+        condition: service_started
+      kafka:
+        condition: service_started
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/bookstore
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      EUREKA_SERVER: http://discovery:8761/eureka/
     networks:
       - app-network
 
@@ -104,8 +165,18 @@ services:
     ports:
       - "8082:8082"
     depends_on:
-      - postgres
-      - kafka
+      discovery:
+        condition: service_healthy
+      postgres:
+        condition: service_started
+      kafka:
+        condition: service_started
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/bookstore
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      EUREKA_SERVER: http://discovery:8761/eureka/
     networks:
       - app-network
 
@@ -115,8 +186,19 @@ services:
     ports:
       - "8085:8085"
     depends_on:
-      - elasticsearch
-      - kafka
+      discovery:
+        condition: service_healthy
+      elasticsearch:
+        condition: service_healthy
+      kafka:
+        condition: service_started
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/bookstore
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_ELASTICSEARCH_URIS: http://elasticsearch:9200
+      EUREKA_SERVER: http://discovery:8761/eureka/
     networks:
       - app-network
 
@@ -126,18 +208,24 @@ services:
     ports:
       - "8084:8084"
     depends_on:
-      - postgres
-      - kafka
+      discovery:
+        condition: service_healthy
+      postgres:
+        condition: service_started
+      kafka:
+        condition: service_started
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/bookstore
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: postgres
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      EUREKA_SERVER: http://discovery:8761/eureka/
     networks:
       - app-network
 
-  discovery:
-    image: discovery:latest
-    container_name: discovery
-    ports:
-      - "8761:8761"
-    networks:
-      - app-network
+volumes:
+  postgres-data:
+  elasticsearch-data:
 
 networks:
   app-network:

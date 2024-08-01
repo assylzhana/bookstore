@@ -18,9 +18,11 @@ public class Order {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private Long userId;
+    @Enumerated(value = EnumType.STRING)
     private OrderStatus status;
     private Double totalAmount;
     @ElementCollection
     private List<Long> bookIds;
+    @Enumerated(value = EnumType.STRING)
     private PaymentStatus paymentStatus;
 }

@@ -17,6 +17,7 @@ public class InventoryItem {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @Enumerated(value = EnumType.STRING)
     private Status status;
     private Integer quantity;
     private Double price;
