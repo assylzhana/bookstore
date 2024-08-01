@@ -1,8 +1,24 @@
-create table  if  not exists token (id bigserial not null, access_token varchar(255), logged_out boolean not null, refresh_token varchar(255), user_id bigint, primary key (id));
-create table  if not exists users (id bigserial not null, email varchar(255), fullname varchar(255), password varchar(255), role varchar(255) check (role in ('USER','ADMIN')), primary key (id));
-alter table if exists users drop constraint if exists UK_6dotkott2kjsp8vw4d0m25fb7;
+CREATE TABLE IF NOT EXISTS token (
+                                    id BIGSERIAL NOT NULL,
+                                    access_token VARCHAR(255),
+                                    logged_out BOOLEAN NOT NULL,
+                                    refresh_token VARCHAR(255),
+                                    user_id BIGINT, PRIMARY KEY (id));
+
+CREATE TABLE IF NOT EXISTS users (
+                                     id BIGSERIAL NOT NULL PRIMARY KEY,
+                                     email VARCHAR(255) UNIQUE,
+                                     fullname VARCHAR(255),
+                                     password VARCHAR(255),
+                                     role VARCHAR(255) CHECK (role IN ('USER', 'ADMIN')));
+ALTER TABLE users
+    ADD CONSTRAINT unique_email UNIQUE (email);
+ALTER TABLE IF EXISTS users DROP CONSTRAINT IF EXISTS UK_6dotkott2kjsp8vw4d0m25fb7;
 
 /*12345678*/
 INSERT INTO users (email, fullname, password, role)
-VALUES ('220107141@stu.sdu.edu.kz', 'Assylzhan Kabibulla', '$2a$12$2MC4ckkVNcvzMFyByBJiGuKlQrCQFqdgIUi3zBc9D2oqiZ4a7xEEy', 'ADMIN')
+VALUES ('220107141@stu.sdu.edu.kz',
+        'Assylzhan Kabibulla',
+        '$2a$12$2MC4ckkVNcvzMFyByBJiGuKlQrCQFqdgIUi3zBc9D2oqiZ4a7xEEy',
+        'ADMIN')
 ON CONFLICT (email) DO NOTHING;
