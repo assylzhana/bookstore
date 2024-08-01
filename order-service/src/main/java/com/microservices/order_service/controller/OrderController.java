@@ -23,7 +23,7 @@ public class OrderController {
 
     private final OrderService orderService;
 
-    @PostMapping("pay")
+    @PostMapping("/pay")
     public ResponseEntity<String> pay() {
         Order orderForPay = orderService.pay();
         return ResponseEntity.ok("Send for pay : "+orderForPay.getId());

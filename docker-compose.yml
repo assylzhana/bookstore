@@ -178,9 +178,12 @@ services:
     ports:
       - "8085:8085"
     depends_on:
-      - discovery
-      - elasticsearch
-      - kafka
+      elasticsearch:
+        condition: service_healthy
+      discovery:
+        condition: service_healthy
+      kafka:
+        condition: service_started
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/bookstore
       SPRING_DATASOURCE_USERNAME: postgres
