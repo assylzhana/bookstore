@@ -3,6 +3,8 @@ package com.microservices.inventory_service.controller;
 import com.microservices.inventory_service.model.InventoryItem;
 import com.microservices.inventory_service.model.Status;
 import com.microservices.inventory_service.service.InventoryService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.ws.rs.NotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -11,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+@Tag(name="Inventory methods",  description = "Operations related to inventory")
 @RestController
 @RequestMapping("/inventory")
 @RequiredArgsConstructor
@@ -18,6 +21,7 @@ public class InventoryController {
 
     private final InventoryService inventoryService;
 
+    @Operation(summary = "Get all inventory")
     @GetMapping
     public ResponseEntity<List<InventoryItem>> getAllInventoryItems() {
         try {
@@ -28,6 +32,7 @@ public class InventoryController {
         }
     }
 
+    @Operation(summary = "Get inventory by id")
     @GetMapping("/{id}")
     public ResponseEntity<InventoryItem> getInventoryItem(@PathVariable Long id) {
         try {
@@ -44,6 +49,7 @@ public class InventoryController {
         }
     }
 
+    @Operation(summary = "Create inventory")
     @PostMapping
     public ResponseEntity<InventoryItem> createInventoryItem(@RequestBody InventoryItem inventoryItem) {
         try {
@@ -54,6 +60,7 @@ public class InventoryController {
         }
     }
 
+    @Operation(summary = "Edit inventory")
     @PutMapping("/{id}")
     public ResponseEntity<InventoryItem> editInventoryItem(@PathVariable Long id, @RequestBody InventoryItem inventoryItemDetails) {
         try {
@@ -82,6 +89,7 @@ public class InventoryController {
         }
     }
 
+    @Operation(summary = "Delete inventory")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteInventoryItem(@PathVariable Long id) {
         try {

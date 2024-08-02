@@ -1,6 +1,5 @@
 package com.microservices.book_service.config;
 
-
 import com.microservices.book_service.jwt.JwtFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -12,7 +11,6 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-
 
 @Configuration
 @EnableWebSecurity
@@ -30,6 +28,16 @@ public class SecurityConfig {
                 .csrf().disable()
                 .authorizeRequests(authorizeRequests ->
                         authorizeRequests
+                                .requestMatchers(
+                                        "/swagger-ui.html",
+                                        "/swagger-ui/**",
+                                        "/v3/api-docs/**",
+                                        "/v2/api-docs/**",
+                                        "/swagger-resources/**",
+                                        "/configuration/**",
+                                        "/webjars/**",
+                                        "/public"
+                                ).permitAll()
                                 .requestMatchers(HttpMethod.PUT, "/book/{id}").hasAuthority("ADMIN")
                                 .requestMatchers(HttpMethod.POST, "/book/**").hasAuthority("ADMIN")
                                 .requestMatchers(HttpMethod.DELETE, "/book/**").hasAuthority("ADMIN")
@@ -48,6 +56,4 @@ public class SecurityConfig {
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
-
-
 }

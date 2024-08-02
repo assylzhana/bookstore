@@ -2,6 +2,8 @@ package com.microservices.book_service.controller;
 
 import com.microservices.book_service.model.Book;
 import com.microservices.book_service.service.BookService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.ws.rs.NotFoundException;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +14,7 @@ import org.springframework.web.service.annotation.HttpExchange;
 
 import java.util.List;
 
+@Tag(name="Book methods",  description = "Operations related to books")
 @RestController
 @RequestMapping("/book")
 @RequiredArgsConstructor
@@ -19,12 +22,14 @@ public class BookController {
 
     private final BookService bookService;
 
+    @Operation(summary = "Get all books")
     @GetMapping("/all")
     public ResponseEntity<List<Book>> getAllBooks() {
         List<Book> books = bookService.getAllBooks();
         return ResponseEntity.ok(books);
     }
 
+    @Operation(summary = "Create a new book, then send to inventory and search")
     @PostMapping
     public ResponseEntity<?> createBook(@RequestBody Book book) {
         try {
@@ -35,7 +40,7 @@ public class BookController {
         }
     }
 
-
+    @Operation(summary = "Get a book by ID")
     @GetMapping("/{id}")
     public ResponseEntity<?> getBook(@PathVariable Long id) {
         try {
@@ -48,6 +53,7 @@ public class BookController {
         }
     }
 
+    @Operation(summary = "Edit a book by ID")
     @PutMapping("/{id}")
     public ResponseEntity<?> editBook(@PathVariable Long id, @RequestBody Book newbook) {
         try {

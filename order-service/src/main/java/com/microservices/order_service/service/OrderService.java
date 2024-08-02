@@ -51,7 +51,8 @@ public class OrderService {
     @KafkaListener(topics = "inventory-events", groupId = "inventory_order_id")
     public void consumeBookEvent(InventoryItem inventory) {
         System.out.println("Received event for inventory: " + inventory);
-        List<OrderItemPrice> prices = orderItemPriceRepository.findByBookId(inventory.getBookId());
+        List<OrderItemPrice> prices = orderItemPriceRepository
+                .findByBookId(inventory.getBookId());
         if (!prices.isEmpty()) {
             OrderItemPrice price = prices.get(0);
             price.setPrice(inventory.getPrice());
@@ -67,6 +68,16 @@ public class OrderService {
 
     @Transactional
     public Order createOrder(Order order) {
+        Authentication authentication = SecurityContextHolder
+                .getContext().getAuthentication();
+        Object principal = authentication.getPrincipal();
+        if (principal instanceof UserDto userDto) {
+            List<Order> pendingOrders = orderRepository
+                    .findAllByUserIdAndStatus(userDto.getId(), OrderStatus.PENDING);
+            if (pendingOrders.size() != 1) {
+                throw new OrderAlreadyPendingException("U have pending order");
+            }
+        }
         order.setStatus(OrderStatus.PENDING);
         order.setPaymentStatus(PaymentStatus.not_paid);
         order.setTotalAmount(calculateTotalAmount(order.getBookIds()));
@@ -77,7 +88,8 @@ public class OrderService {
 
     private Double calculateTotalAmount(List<Long> bookIds) {
         double sum = 0.0;
-        List<OrderItemPrice> orderItemPrices = orderItemPriceRepository.findByBookIdIn(bookIds);
+        List<OrderItemPrice> orderItemPrices =
+                orderItemPriceRepository.findByBookIdIn(bookIds);
         for (OrderItemPrice orderItemPrice : orderItemPrices) {
             sum += orderItemPrice.getPrice();
         }
@@ -131,13 +143,15 @@ public class OrderService {
 
     @Transactional
     public Order pay() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Authentication authentication = SecurityContextHolder
+                .getContext().getAuthentication();
         Object principal = authentication.getPrincipal();
         Long userId = null;
         if (principal instanceof UserDto userDto) {
             userId = userDto.getId();
         }
-        List<Order> pendingOrders = orderRepository.findAllByUserIdAndStatus(userId, OrderStatus.PENDING);
+        List<Order> pendingOrders = orderRepository
+                .findAllByUserIdAndStatus(userId, OrderStatus.PENDING);
         if (pendingOrders.size() != 1) {
             throw new OrderAlreadyPendingException("U have pending order");
         }

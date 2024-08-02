@@ -6,6 +6,8 @@ import com.microservices.order_service.model.Order;
 import com.microservices.order_service.model.OrderStatus;
 import com.microservices.order_service.model.PaymentStatus;
 import com.microservices.order_service.service.OrderService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,6 +18,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Optional;
 
+@Tag(name="Order methods",  description = "Operations related to order")
 @RestController
 @RequestMapping("/order")
 @RequiredArgsConstructor
@@ -23,12 +26,14 @@ public class OrderController {
 
     private final OrderService orderService;
 
+    @Operation(summary = "pay")
     @PostMapping("/pay")
     public ResponseEntity<String> pay() {
         Order orderForPay = orderService.pay();
         return ResponseEntity.ok("Send for pay : "+orderForPay.getId());
     }
 
+    @Operation(summary = "create order with authenticated user")
     @PostMapping
     public ResponseEntity<Order> createOrder(@RequestBody OrderRequest orderRequest) {
         Order order = new Order();
@@ -43,6 +48,8 @@ public class OrderController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
     }
+
+    @Operation(summary = "Edit order")
     @PutMapping("/{orderId}")
     public ResponseEntity<Order> updateOrder(@PathVariable Long orderId, @RequestBody Order updatedOrder) {
         Order id = orderService.getOrderById(orderId).orElseThrow();
@@ -60,18 +67,21 @@ public class OrderController {
         if (order != null) {
             return ResponseEntity.ok(order);
         }
-        return ResponseEntity.notFound().build();
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
+    @Operation(summary = "Cancel order")
     @DeleteMapping("/{orderId}")
     public ResponseEntity<Void> cancelOrder(@PathVariable Long orderId) {
         boolean isCanceled = orderService.cancelOrder(orderId);
         if (isCanceled) {
-            return ResponseEntity.noContent().build();
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        return ResponseEntity.notFound().build();
     }
 
+    @Operation(summary = "Delete order")
     @DeleteMapping("delete/{orderId}")
     public ResponseEntity<Void> deleteOrder(@PathVariable Long orderId) {
         Order order = orderService.getOrderById(orderId).orElse(null);
@@ -83,18 +93,19 @@ public class OrderController {
         }
     }
 
+    @Operation(summary = "Get order by user id")
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<Order>> getOrdersByUserId(@PathVariable Long userId) {
         List<Order> orders = orderService.getOrdersByUserId(userId);
         return ResponseEntity.ok(orders);
     }
-
+    @Operation(summary = "Get order by id")
     @GetMapping("/{orderId}")
     public ResponseEntity<Optional<Order>> getOrderById(@PathVariable Long orderId) {
         Optional<Order> order = orderService.getOrderById(orderId);
         if (order.isPresent()) {
             return ResponseEntity.ok(order);
         }
-        return ResponseEntity.notFound().build();
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 }

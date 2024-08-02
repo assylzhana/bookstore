@@ -29,6 +29,16 @@ public class SecurityConfig {
                 .csrf().disable()
                 .authorizeRequests(authorizeRequests ->
                         authorizeRequests
+                                .requestMatchers(
+                                        "/swagger-ui.html",
+                                        "/swagger-ui/**",
+                                        "/v3/api-docs/**",
+                                        "/v2/api-docs/**",
+                                        "/swagger-resources/**",
+                                        "/configuration/**",
+                                        "/webjars/**",
+                                        "/public"
+                                ).permitAll()
                                 .requestMatchers(HttpMethod.PUT, "/inventory/{id}").hasAuthority("ADMIN")
                                 .requestMatchers(HttpMethod.POST, "/inventory/**").hasAuthority("ADMIN")
                                 .requestMatchers(HttpMethod.DELETE, "/inventory/**").hasAuthority("ADMIN")
